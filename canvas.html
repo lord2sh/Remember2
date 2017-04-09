@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
+		</script>
+		<script>
+			var ws = new WebSocket("ws://localhost:3000/echo");
+			window.ws.onmessage = function(e){
+				
+			};
+			window.ws.onclose = function(e){
+				
+			};
+			window.ws.onerror = function(e){
+				
+			};
+		</script>
+	</head>
+
+	<body>
+		<canvas id="canvas" width="100%" height="100%">
+		</canvas>
+		
+		<script>
+			var canvas;
+			var canvasWidth;
+			var ctx;
+			var settingmode = false;
+			var rowcount = 10;
+			var username = "SFSFSFSFSF";
+			var items = ["{0}",
+						"{1}",
+						"{2}",
+						"{3}",
+						"{4}",
+						"{5}",
+						"{6}",
+						"{7}"];
+			$(document).ready(function() { 
+				init();
+				drawbuttons();
+			});
+			
+ 
+      		function init() {
+        		canvas = document.getElementById('canvas');
+					if (canvas.getContext) {
+  					ctx = canvas.getContext("2d");
+          			window.addEventListener('resize', resizeCanvas, false);
+  					window.addEventListener('orientationchange', resizeCanvas, false);
+  					window.addEventListener('mousedown', onMouseDown, false);
+  					resizeCanvas();
+        		}
+      		}
+      		
+      		function drawbuttons() {
+      			var rowheight = canvas.height / 11;
+      			var sidemargin = canvas.width / 10;
+      			var top = rowheight*2;
+      			ctx.fillStyle = "#CCCCCC";
+      			if(settingmode)
+      				ctx.fillStyle = "#333333";
+      			ctx.fillRect(0,0,canvas.width, canvas.height);
+      			
+      			ctx.fillStyle = "#FFFFFF";
+      			ctx.fillRect(sidemargin,rowheight/2,sidemargin*1.5, rowheight);
+      			
+  				var x1 = sidemargin + ((canvas.width - sidemargin*2)/2);
+   				var x2 = sidemargin + ((canvas.width - sidemargin*2)/4*3);
+
+				ctx.font="20px Verdana";
+      			for(var i = 0; i < items.length; i++)
+      			{
+      				ctx.fillStyle = "#EEEEEE";
+      				ctx.fillRect(sidemargin, top, canvas.width - sidemargin*2, rowheight);
+      				ctx.beginPath();      				
+      				ctx.rect(sidemargin, top, canvas.width - sidemargin*2, rowheight);
+		      		ctx.lineWidth = 2;
+		      		ctx.strokeStyle = 'black';
+		      		ctx.stroke();
+				    ctx.fillStyle = "#555555";
+				    var textY = top + rowheight/2;
+		      		ctx.fillText(items[i], sidemargin*2, textY);
+		      		if(settingmode){
+		      			ctx.fillText("Edit", x1+30, textY);
+		      			ctx.fillText("Clear", x2+30, textY);
+		      		}
+		      		top += rowheight;
+   				}
+   				if(settingmode){
+	   				ctx.beginPath();
+	   				ctx.moveTo(x1, rowheight*2);
+	   				ctx.lineTo(x1, canvas.height - rowheight);
+	   				ctx.moveTo(x2, rowheight*2);
+	   				ctx.lineTo(x2, canvas.height - rowheight);
+	   				ctx.stroke();
+	   			}
+   			}
+
+ 
+      		function resizeCanvas() {
+        		canvas.width = window.innerWidth;
+        		canvas.height = window.innerHeight;
+        		drawbuttons();
+      		}
+      		function onMouseDown(e){
+      			var rowheight = canvas.height / 11;
+      			var sidemargin = canvas.width / 10;
+      			var top = rowheight*2;
+      			
+      			if(e.clientY > top){
+      				var buttonindex = parseInt((e.clientY - top)/rowheight);
+      				if(buttonindex >= 0  && buttonindex < 8){
+      					if(settingmode){
+	      					var x1 = sidemargin + ((canvas.width - sidemargin*2)/2);
+	   						var x2 = sidemargin + ((canvas.width - sidemargin*2)/4*3);
+	   						if(e.clientX > x1 && e.clientX <= x2)
+	   						{
+	   							// settings
+	   							alert("setting");
+	   							location.replace("http://localhost:3000/settings/"+buttonindex);
+	   							return;
+	   						}
+	   						else if(e.clientX > x2)
+	   						{
+	   							// clear tests
+	   							return;
+	   						}
+   						}
+   						// move test!!@!
+				   	
+						var buttontext = items[buttonindex];
+						var empty = (buttontext.search('(0/0)') != -1);
+						var remain0 = (buttontext.search('(0/') != -1);
+						
+						if(empty){
+							if(confirm("노트가 비어있습니다. 등록하시겟습니까?")){
+								location.assign("http://localhost:3000/settings/"+buttonindex);
+							}
+							return;
+						}
+						if(remain0)
+						{
+							if(confirm('암기가 끝났습니다. 테스트내역을 지우고 처음부터 다시 시작하시겠습니까?')){
+								var senddata = {command: 'tableClear', username: username, index : buttonindex };
+								ws.send( JSON.stringify(senddata) );
+								location.reload();
+							}
+							return;
+						}
+						location.assign("http://localhost:3000/test/"+username+"/"+buttonindex);
+					}
+				}
+      			else{
+      				if(e.clientX > sidemargin && e.clientX < sidemargin *2.5){
+      					settingmode = !settingmode;
+      					drawbuttons();
+      					
+      				}
+      			}
+      		}
+		</script>
+	</body>
+</html>

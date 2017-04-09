@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
+		</script>
+		<script>
+		var url = location.href;
+		var items = url.split('/');
+		var pageindex = "";
+		if(items.length > 1)
+		{
+			pageindex = items[items.length-1];
+		}
+		
+		//var ws = new WebSocket("ws://localhost:3000/echo");
+		//ws.onmessage = function(e){
+		//	document.getElementById('textbox').innerHTML = e.data;
+		//	 //alert(e.data);
+		//};
+			</script>
+		</script>
+	</head>
+	<body>
+		<form method = "post" id="usrform">
+		  Name: <input type="text" name="title" value ="{0}">
+		  <input type="submit">
+		</form>
+		<br>
+		<textarea id="textbox" rows="4" cols="50" name="comment" form="usrform">{1}</textarea>
+		<script>
+			$(document).ready(function() { 
+				document.getElementById('usrform').action = "/upload/" + pageindex;				
+				//var senddata = {'command': 'gettable', 'id' : username };
+				//ws.send
+			});
+		</script>
+	</body>
+</html>
